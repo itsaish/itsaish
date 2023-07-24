@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleDepositContract {
+    address public partyA;
+    address public partyB;
+    uint256 public depositedAmount;
+    bool public releaseFundsTriggered;
+
+    constructor(address _partyB) payable {
+        partyA = msg.sender;
+        partyB = _partyB;
+        depositedAmount = msg.value;
+        releaseFundsTriggered = false;
+    }
+
+    modifier onlyPartyB() {
+        require(msg.sender == partyB, "Only Party B can call this function");
+        _;
+    }
+
+    function releaseFunds() external onlyPartyB {
+        require(!releaseFundsTriggered, "Funds already released");
+        releaseFundsTriggered = true;
+        payable(partyB).transfer(depositedAmount);
+    }
+
+    function getDepositedAmount() external view returns (uint256) {
+        return depositedAmount;
+    }
+}
